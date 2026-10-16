@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" font-family="Public Sans, Helvetica, Arial, sans-serif">
+  <title>CrackRuler architecture: OpenCV 5 on AWS Lambda (arm64, Graviton)</title>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1E2120"/></marker>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6B706C"/></marker>
+  </defs>
+  <rect width="1600" height="900" fill="#D9DAD5"/>
+  <text x="48" y="64" font-size="34" font-weight="800" fill="#1E2120">CrackRuler · architecture</text>
+  <text x="48" y="96" font-size="17" fill="#4A4F4C">One photo in, a metric crack report out. Everything below the dashed line runs in AWS account (us-east-1).</text>
+
+  <!-- client -->
+  <rect x="48" y="140" width="330" height="250" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+  <text x="68" y="174" font-size="20" font-weight="800" fill="#1E2120">Inspector's browser</text>
+  <text x="68" y="204" font-size="15" fill="#1E2120">phone or laptop</text>
+  <text x="68" y="236" font-size="14" fill="#4A4F4C">• photo with printed ArUco marker</text>
+  <text x="68" y="260" font-size="14" fill="#4A4F4C">• downscaled on device to ≤3200 px</text>
+  <text x="68" y="284" font-size="14" fill="#4A4F4C">• exposure class + marker size</text>
+  <text x="68" y="308" font-size="14" fill="#4A4F4C">• shows verdict, comparator,</text>
+  <text x="68" y="328" font-size="14" fill="#4A4F4C">  annotated photo, agent trace</text>
+  <rect x="68" y="350" width="160" height="22" fill="#F2C200"/>
+  <text x="76" y="366" font-size="13" font-weight="700" fill="#1E2120">static UI, CSP 'self'</text>
+
+  <line x1="40" y1="420" x2="1560" y2="420" stroke="#6B706C" stroke-dasharray="8 6"/>
+  <text x="1552" y="412" font-size="13" text-anchor="end" fill="#4A4F4C">AWS · account boundary</text>
+
+  <!-- function url -->
+  <rect x="48" y="470" width="330" height="120" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+  <text x="68" y="504" font-size="20" font-weight="800" fill="#1E2120">Lambda Function URL</text>
+  <text x="68" y="532" font-size="14" fill="#4A4F4C">HTTPS, CORS, auth NONE (public demo)</text>
+  <text x="68" y="556" font-size="14" fill="#4A4F4C">GET / · POST /api/inspect · /api/health</text>
+  <text x="68" y="578" font-size="14" fill="#4A4F4C">6 MB payload limit</text>
+  <line x1="213" y1="392" x2="213" y2="466" stroke="#1E2120" stroke-width="2" marker-end="url(#a)" marker-start="url(#a)"/>
+  <text x="224" y="440" font-size="13" fill="#1E2120">JSON in · report out</text>
+
+  <!-- lambda -->
+  <rect x="440" y="140" width="700" height="450" fill="#E3E4DF" stroke="#1E2120" stroke-width="2.5"/>
+  <text x="464" y="176" font-size="22" font-weight="800" fill="#1E2120">Lambda crackruler-inspect</text>
+  <text x="464" y="204" font-size="15" fill="#1E2120">Python 3.12 · arm64 (AWS Graviton) · 2048 MB · 60 s · zip 62 MB / 152 MB unzipped</text>
+  <rect x="464" y="222" width="652" height="40" fill="#1E2120"/>
+  <text x="480" y="248" font-size="16" font-weight="700" fill="#E4E5E0">OpenCV 5.0.0 (opencv-contrib-python-headless 5.0.0.93) · numpy 2.5.4</text>
+
+  <g font-size="14" fill="#1E2120">
+    <rect x="464" y="280" width="200" height="140" fill="#D9DAD5" stroke="#6B706C"/>
+    <text x="478" y="304" font-weight="800">Scale + plane</text>
+    <text x="478" y="328">aruco.ArucoDetector</text>
+    <text x="478" y="348">sub-pixel corners</text>
+    <text x="478" y="368">getPerspectiveTransform</text>
+    <text x="478" y="388">warpPerspective</text>
+    <text x="478" y="408">marker-edge blur probe</text>
+
+    <rect x="690" y="280" width="200" height="140" fill="#D9DAD5" stroke="#6B706C"/>
+    <text x="704" y="304" font-weight="800">Find</text>
+    <text x="704" y="328">dnn.readNetFromONNX</text>
+    <text x="704" y="348">U-Net 1.56 M params</text>
+    <text x="704" y="368">+ Hessian ridge filter</text>
+    <text x="704" y="388">(Sobel 2nd derivatives)</text>
+    <text x="704" y="408">hysteresis, components</text>
+
+    <rect x="916" y="280" width="200" height="140" fill="#D9DAD5" stroke="#6B706C"/>
+    <text x="930" y="304" font-weight="800">Measure</text>
+    <text x="930" y="328">ximgproc.thinning</text>
+    <text x="930" y="348">distanceTransform</text>
+    <text x="930" y="368">remap: profiles across</text>
+    <text x="930" y="388">FWHD + blur inversion</text>
+    <text x="930" y="408">length, orientation</text>
+  </g>
+  <rect x="464" y="440" width="652" height="130" fill="#F2C200" fill-opacity=".35" stroke="#1E2120"/>
+  <text x="480" y="468" font-size="17" font-weight="800" fill="#1E2120">Inspection agent (planner over the OpenCV tools)</text>
+  <text x="480" y="494" font-size="14" fill="#1E2120">observes each tool's output, chooses the next tool, stops with an action:</text>
+  <text x="480" y="518" font-size="14" fill="#1E2120">log · monitor · engineer review · retake (closer / steadier) · human review</text>
+  <text x="480" y="542" font-size="14" fill="#1E2120">guideline: ACI 224R-01 Table 4.1 by exposure · every step traced with timing</text>
+  <text x="480" y="562" font-size="13" fill="#4A4F4C">uploaded photo stays in memory and is never written to storage</text>
+
+  <line x1="378" y1="530" x2="436" y2="530" stroke="#1E2120" stroke-width="2" marker-end="url(#a)" marker-start="url(#a)"/>
+
+  <!-- right column services -->
+  <rect x="1200" y="140" width="352" height="130" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+  <text x="1220" y="174" font-size="19" font-weight="800" fill="#1E2120">S3 · reports bucket</text>
+  <text x="1220" y="200" font-size="14" fill="#4A4F4C">report JSON + annotated JPEG only</text>
+  <text x="1220" y="222" font-size="14" fill="#4A4F4C">private, SSE-S3, public access blocked</text>
+  <text x="1220" y="244" font-size="14" fill="#4A4F4C">lifecycle: expire after 7 days</text>
+  <line x1="1140" y1="205" x2="1196" y2="205" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+
+  <rect x="1200" y="300" width="352" height="160" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+  <text x="1220" y="334" font-size="19" font-weight="800" fill="#1E2120">CloudWatch</text>
+  <text x="1220" y="360" font-size="14" fill="#4A4F4C">logs: one JSON line per request (14 d)</text>
+  <text x="1220" y="382" font-size="14" fill="#4A4F4C">EMF metrics: latency, action, cracks</text>
+  <text x="1220" y="404" font-size="14" fill="#4A4F4C">dashboard "crackruler"</text>
+  <text x="1220" y="426" font-size="14" fill="#4A4F4C">alarm on errors → optional SNS e-mail</text>
+  <text x="1220" y="448" font-size="14" fill="#4A4F4C">X-Ray active tracing</text>
+  <line x1="1140" y1="380" x2="1196" y2="380" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+
+  <rect x="1200" y="490" width="352" height="100" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+  <text x="1220" y="524" font-size="19" font-weight="800" fill="#1E2120">IAM + cost guard</text>
+  <text x="1220" y="550" font-size="14" fill="#4A4F4C">role: logs, s3:Put/Get on reports/*, X-Ray</text>
+  <text x="1220" y="572" font-size="14" fill="#4A4F4C">AWS Budget alert at $5 / month</text>
+
+  <!-- deploy -->
+  <rect x="440" y="640" width="700" height="210" fill="none" stroke="#6B706C" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="464" y="672" font-size="19" font-weight="800" fill="#1E2120">Build + deploy (reproducible)</text>
+  <text x="464" y="700" font-size="14" fill="#1E2120">infra/build.sh: pip --platform manylinux_2_28_aarch64 → zip (no Docker, no emulation)</text>
+  <text x="464" y="724" font-size="14" fill="#1E2120">infra/deploy.sh: zip → S3 artifact bucket → CloudFormation infra/template.yaml</text>
+  <text x="464" y="748" font-size="14" fill="#1E2120">stack: bucket, role, function, URL, log group, alarm, dashboard</text>
+  <text x="464" y="772" font-size="14" fill="#1E2120">infra/teardown.sh removes everything</text>
+  <text x="464" y="804" font-size="14" fill="#4A4F4C">offline: train/train_unet.py (PyTorch, Özgenel 2019 CC BY 4.0, train split) → ONNX</text>
+  <text x="464" y="826" font-size="14" fill="#4A4F4C">eval/: held-out test photos, crack/no-crack patches, SYNTHETIC metric scenes</text>
+  <line x1="790" y1="636" x2="790" y2="596" stroke="#6B706C" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#g)"/>
+
+  <rect x="48" y="640" width="330" height="210" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+  <text x="68" y="672" font-size="19" font-weight="800" fill="#1E2120">Printed marker</text>
+  <text x="68" y="700" font-size="14" fill="#4A4F4C">ArUco DICT_4X4_50, id 0</text>
+  <text x="68" y="722" font-size="14" fill="#4A4F4C">SVG in real mm (50 mm)</text>
+  <text x="68" y="744" font-size="14" fill="#4A4F4C">gives px/mm, homography</text>
+  <text x="68" y="766" font-size="14" fill="#4A4F4C">and optical blur</text><text x="68" y="788" font-size="14" fill="#4A4F4C">(edge rise)</text>
+  <g transform="translate(262,730)"><rect width="96" height="96" fill="#fff"/><rect x="12" y="12" width="72" height="72" fill="#111"/><rect x="24" y="24" width="12" height="12" fill="#fff"/><rect x="36" y="36" width="12" height="12" fill="#fff"/><rect x="60" y="24" width="12" height="36" fill="#fff"/><rect x="48" y="24" width="12" height="12" fill="#fff"/><rect x="48" y="48" width="12" height="24" fill="#fff"/></g>
+</svg>

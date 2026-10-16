@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1020" viewBox="0 0 1600 1020" font-family="Public Sans, Helvetica, Arial, sans-serif">
+<title>CrackRuler agent: perception, decision, action</title><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1E2120"/></marker><marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#B3302A"/></marker></defs>
+<rect width="1600" height="1020" fill="#D9DAD5"/>
+<text x="48" y="60" font-size="32" font-weight="800" fill="#1E2120">Agent loop · what the image changes</text>
+<text x="48" y="92" font-size="16" fill="#4A4F4C">Centre: OpenCV 5 perception tools in the order the planner calls them. Side arrows: decisions taken from what a tool saw. Yellow = a person is asked.</text>
+<rect x="600" y="130" width="400" height="58" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="616" y="155" font-size="16" font-weight="800" fill="#1E2120">1  assess_quality</text>
+<text x="616" y="176" font-size="13" fill="#4A4F4C">sharpness, exposure</text>
+<rect x="600" y="208" width="400" height="58" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="616" y="233" font-size="16" font-weight="800" fill="#1E2120">2  find_marker</text>
+<text x="616" y="254" font-size="13" fill="#4A4F4C">ArucoDetector (+ CLAHE retry)</text>
+<line x1="800.0" y1="188" x2="800.0" y2="206" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="600" y="286" width="400" height="58" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="616" y="311" font-size="16" font-weight="800" fill="#1E2120">3  rectify</text>
+<text x="616" y="332" font-size="13" fill="#4A4F4C">homography + marker-edge blur probe</text>
+<line x1="800.0" y1="266" x2="800.0" y2="284" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="600" y="364" width="400" height="58" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="616" y="389" font-size="16" font-weight="800" fill="#1E2120">4  segment · dnn</text>
+<text x="616" y="410" font-size="13" fill="#4A4F4C">U-Net in cv.dnn, 1024 px view</text>
+<line x1="800.0" y1="344" x2="800.0" y2="362" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="600" y="442" width="400" height="58" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="616" y="467" font-size="16" font-weight="800" fill="#1E2120">5  segment · classical</text>
+<text x="616" y="488" font-size="13" fill="#4A4F4C">Hessian ridge, sensitive second opinion</text>
+<line x1="800.0" y1="422" x2="800.0" y2="440" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="600" y="520" width="400" height="58" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="616" y="545" font-size="16" font-weight="800" fill="#1E2120">6  cross_check</text>
+<text x="616" y="566" font-size="13" fill="#4A4F4C">per-crack agreement of the two</text>
+<line x1="800.0" y1="500" x2="800.0" y2="518" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="600" y="598" width="400" height="58" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="616" y="623" font-size="16" font-weight="800" fill="#1E2120">7  measure</text>
+<text x="616" y="644" font-size="13" fill="#4A4F4C">full-res profiles, FWHD, deblur</text>
+<line x1="800.0" y1="578" x2="800.0" y2="596" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="600" y="676" width="400" height="58" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="616" y="701" font-size="16" font-weight="800" fill="#1E2120">8  check_resolution</text>
+<text x="616" y="722" font-size="13" fill="#4A4F4C">smallest measurable width vs guideline</text>
+<line x1="800.0" y1="656" x2="800.0" y2="674" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="600" y="754" width="400" height="58" fill="#1E2120" stroke="#1E2120" stroke-width="1.5"/>
+<text x="616" y="779" font-size="16" font-weight="800" fill="#E4E5E0">9  decide</text>
+<text x="616" y="800" font-size="13" fill="#C9CBC5">ACI 224R-01 Table 4.1 + uncertainty</text>
+<line x1="800.0" y1="734" x2="800.0" y2="752" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="48" y="130" width="300" height="604" fill="#F2C200" stroke="#1E2120" stroke-width="1.5"/>
+<text x="64" y="160" font-size="18" font-weight="800" fill="#1E2120">retake</text>
+<text x="64" y="188" font-size="14" fill="#1E2120">the photo cannot support a</text>
+<text x="64" y="210" font-size="14" fill="#1E2120">measurement; the reason and</text>
+<text x="64" y="232" font-size="14" fill="#1E2120">the fix are in the report:</text>
+<text x="64" y="254" font-size="14" fill="#1E2120"></text>
+<text x="64" y="276" font-size="14" fill="#1E2120">• blurry or clipped frame</text>
+<text x="64" y="298" font-size="14" fill="#1E2120">• “hold the phone steady and</text>
+<text x="64" y="320" font-size="14" fill="#1E2120">   refocus” (blur from marker edge)</text>
+<text x="64" y="342" font-size="14" fill="#1E2120">• “move about 1.8x closer”</text>
+<text x="64" y="364" font-size="14" fill="#1E2120">   (factor from measured px/mm)</text>
+<line x1="600" y1="159.0" x2="352" y2="159.0" stroke="#B3302A" stroke-width="2" marker-end="url(#r)"/>
+<text x="588" y="151.0" font-size="13" font-weight="700" fill="#B3302A" text-anchor="end">blurry / badly exposed</text>
+<line x1="600" y1="315.0" x2="352" y2="315.0" stroke="#B3302A" stroke-width="2" marker-end="url(#r)"/>
+<text x="588" y="307.0" font-size="13" font-weight="700" fill="#B3302A" text-anchor="end">marker edge σ > 2.5 px</text>
+<line x1="600" y1="705.0" x2="352" y2="705.0" stroke="#B3302A" stroke-width="2" marker-end="url(#r)"/>
+<text x="588" y="697.0" font-size="13" font-weight="700" fill="#B3302A" text-anchor="end">guideline narrower than resolvable</text>
+<rect x="1250" y="202" width="302" height="82" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="1266" y="230" font-size="17" font-weight="800" fill="#1E2120">pixel-only mode</text>
+<text x="1266" y="254" font-size="13" fill="#1E2120">no marker after two searches:</text>
+<text x="1266" y="274" font-size="13" fill="#1E2120">widths stay in px, no mm verdict</text>
+<line x1="1000" y1="237.0" x2="1246" y2="237.0" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<text x="1012" y="229.0" font-size="13" font-weight="700" fill="#1E2120">second miss</text>
+<rect x="1250" y="372" width="302" height="58" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="1266" y="400" font-size="17" font-weight="800" fill="#1E2120">no crack</text>
+<text x="1266" y="424" font-size="13" fill="#1E2120">neither detector finds anything</text>
+<rect x="1250" y="472" width="302" height="108" fill="#F2C200" stroke="#1E2120" stroke-width="1.5"/>
+<text x="1266" y="500" font-size="17" font-weight="800" fill="#1E2120">human review</text>
+<text x="1266" y="524" font-size="13" fill="#1E2120">only the sensitive detector sees it,</text>
+<text x="1266" y="544" font-size="13" fill="#1E2120">no scale reference, unconfirmed</text>
+<text x="1266" y="564" font-size="13" fill="#1E2120">regions, or step budget used up</text>
+<path d="M1000 459.0 H 1150 V 401 H 1246" fill="none" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<text x="1012" y="451.0" font-size="13" font-weight="700" fill="#1E2120">both empty</text>
+<path d="M1000 483.0 H 1150 V 518 H 1246" fill="none" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<text x="1012" y="475.0" font-size="13" font-weight="700" fill="#1E2120">only the second sees it</text>
+<text x="1012" y="553.0" font-size="13" fill="#4A4F4C">no support → “unconfirmed”</text>
+<line x1="800.0" y1="812" x2="800.0" y2="842" stroke="#1E2120" stroke-width="2"/>
+<line x1="218" y1="842" x2="1346" y2="842" stroke="#1E2120" stroke-width="2"/>
+<line x1="218" y1="842" x2="218" y2="869" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="48" y="872" width="340" height="86" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="64" y="900" font-size="17" font-weight="800" fill="#1E2120">log</text>
+<text x="64" y="924" font-size="13" fill="#1E2120">p95 + uncertainty below</text><text x="64" y="942" font-size="13" fill="#1E2120">0.8 × guideline</text>
+<line x1="594" y1="842" x2="594" y2="869" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="424" y="872" width="340" height="86" fill="#E3E4DF" stroke="#1E2120" stroke-width="1.5"/>
+<text x="440" y="900" font-size="17" font-weight="800" fill="#1E2120">monitor</text>
+<text x="440" y="924" font-size="13" fill="#1E2120">inside the uncertainty band:</text><text x="440" y="942" font-size="13" fill="#1E2120">re-measure within 3 months</text>
+<line x1="970" y1="842" x2="970" y2="869" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="800" y="872" width="340" height="86" fill="#F2C200" stroke="#1E2120" stroke-width="1.5"/>
+<text x="816" y="900" font-size="17" font-weight="800" fill="#1E2120">engineer review</text>
+<text x="816" y="924" font-size="13" fill="#1E2120">p95 − uncertainty above the</text><text x="816" y="942" font-size="13" fill="#1E2120">guideline, needs_human = true</text>
+<line x1="1346" y1="842" x2="1346" y2="869" stroke="#1E2120" stroke-width="2" marker-end="url(#a)"/>
+<rect x="1176" y="872" width="340" height="86" fill="#F2C200" stroke="#1E2120" stroke-width="1.5"/>
+<text x="1192" y="900" font-size="17" font-weight="800" fill="#1E2120">human review</text>
+<text x="1192" y="924" font-size="13" fill="#1E2120">unconfirmed region or</text><text x="1192" y="942" font-size="13" fill="#1E2120">no scale reference</text>
+<text x="48" y="996" font-size="13" fill="#4A4F4C">Every step is written to the report trace: tool, arguments, observation, note, milliseconds. The planner is deterministic, auditable and has a 14-step budget.</text>
+</svg>

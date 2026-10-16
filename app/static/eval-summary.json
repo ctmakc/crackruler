@@ -1,0 +1,18 @@
+[
+ {
+  "value": "0.937",
+  "label": "pixel F1 (2 px tolerance), U-Net, 69 held-out real photos"
+ },
+ {
+  "value": "0.756",
+  "label": "strict IoU, same test photos"
+ },
+ {
+  "value": "0.930",
+  "label": "pixel F1 of the classical second detector (no training)"
+ },
+ {
+  "value": "≤0.045 mm",
+  "label": "worst mean width error, SYNTHETIC scenes, cracks ≥2.4 px across"
+ }
+]

@@ -1,0 +1,98 @@
+{
+ "Version": "2012-10-17",
+ "Statement": [
+  {
+   "Sid": "CFN",
+   "Effect": "Allow",
+   "Action": "cloudformation:*",
+   "Resource": "arn:aws:cloudformation:*:ACCOUNT_ID:stack/crackruler*/*"
+  },
+  {
+   "Sid": "Read",
+   "Effect": "Allow",
+   "Action": [
+    "cloudformation:ValidateTemplate",
+    "cloudformation:GetTemplateSummary",
+    "cloudformation:ListStacks",
+    "lambda:GetAccountSettings",
+    "lambda:ListFunctions",
+    "s3:ListAllMyBuckets",
+    "logs:DescribeLogGroups",
+    "logs:StartQuery",
+    "logs:GetQueryResults",
+    "cloudwatch:GetMetricData",
+    "cloudwatch:GetMetricStatistics",
+    "cloudwatch:ListMetrics",
+    "cloudwatch:PutDashboard",
+    "cloudwatch:GetDashboard",
+    "cloudwatch:DeleteDashboards",
+    "cloudwatch:PutMetricAlarm",
+    "cloudwatch:DeleteAlarms",
+    "cloudwatch:DescribeAlarms",
+    "budgets:ViewBudget",
+    "ce:GetCostAndUsage",
+    "ecr:GetAuthorizationToken",
+    "xray:GetTraceSummaries",
+    "xray:BatchGetTraces"
+   ],
+   "Resource": "*"
+  },
+  {
+   "Sid": "Lambda",
+   "Effect": "Allow",
+   "Action": "lambda:*",
+   "Resource": [
+    "arn:aws:lambda:*:ACCOUNT_ID:function:crackruler*",
+    "arn:aws:lambda:*:ACCOUNT_ID:layer:crackruler*"
+   ]
+  },
+  {
+   "Sid": "S3",
+   "Effect": "Allow",
+   "Action": "s3:*",
+   "Resource": [
+    "arn:aws:s3:::crackruler*",
+    "arn:aws:s3:::crackruler*/*"
+   ]
+  },
+  {
+   "Sid": "ECR",
+   "Effect": "Allow",
+   "Action": "ecr:*",
+   "Resource": "arn:aws:ecr:*:ACCOUNT_ID:repository/crackruler*"
+  },
+  {
+   "Sid": "Role",
+   "Effect": "Allow",
+   "Action": [
+    "iam:CreateRole",
+    "iam:DeleteRole",
+    "iam:GetRole",
+    "iam:PassRole",
+    "iam:PutRolePolicy",
+    "iam:DeleteRolePolicy",
+    "iam:GetRolePolicy",
+    "iam:AttachRolePolicy",
+    "iam:DetachRolePolicy",
+    "iam:TagRole",
+    "iam:UntagRole",
+    "iam:ListRolePolicies",
+    "iam:ListAttachedRolePolicies",
+    "iam:UpdateAssumeRolePolicy"
+   ],
+   "Resource": "arn:aws:iam::ACCOUNT_ID:role/crackruler*"
+  },
+  {
+   "Sid": "Logs",
+   "Effect": "Allow",
+   "Action": "logs:*",
+   "Resource": "arn:aws:logs:*:ACCOUNT_ID:log-group:/aws/lambda/crackruler*"
+  },
+  {
+   "Sid": "SNS",
+   "Effect": "Allow",
+   "Action": "sns:*",
+   "Resource": "arn:aws:sns:*:ACCOUNT_ID:crackruler*"
+  }
+ ]
+}

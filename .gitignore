@@ -1,0 +1,15 @@
+.venv/
+.venv-train/
+.tools/
+data/
+build/
+dist/
+*.pyc
+__pycache__/
+eval/out/
+train/runs/
+*.env
+.aws/
+.shots/
+data
+.venv-train

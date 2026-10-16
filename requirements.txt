@@ -1,0 +1,3 @@
+# Runtime (bundled into the Lambda zip for linux/arm64 by infra/deploy.sh)
+opencv-contrib-python-headless==5.0.0.93
+numpy==2.5.4

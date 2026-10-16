@@ -1,0 +1,5 @@
+/* Self-hosted OFL fonts (SIL Open Font License 1.1): Saira Condensed, Public Sans, Martian Mono */
+@font-face{font-family:'Saira Condensed';font-style:normal;font-weight:300;font-display:swap;src:url(/static/SairaCondensed-300.woff2) format('woff2')}
+@font-face{font-family:'Saira Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(/static/SairaCondensed-700.woff2) format('woff2')}
+@font-face{font-family:'Public Sans';font-style:normal;font-weight:400 800;font-display:swap;src:url(/static/PublicSans.woff2) format('woff2')}
+@font-face{font-family:'Martian Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(/static/MartianMono.woff2) format('woff2')}

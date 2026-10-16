@@ -1,0 +1,6 @@
+# Training only (GPU optional). Inference never imports torch.
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.5.1
+onnx==1.17.0
+opencv-contrib-python-headless==5.0.0.93
+numpy==2.5.4

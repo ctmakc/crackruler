@@ -1,0 +1,50 @@
+{
+ "synthetic-0.35mm.jpg": {
+  "label": "Synthetic scene, true width 0.35 mm",
+  "synthetic": true,
+  "true_width_mm": 0.35,
+  "note": "real concrete background (dataset photo), synthetic crack and marker",
+  "short": "0.35 mm crack",
+  "order": 0
+ },
+ "synthetic-0.60mm-tilted.jpg": {
+  "label": "Synthetic, 28 degree tilt, true width 0.60 mm",
+  "synthetic": true,
+  "true_width_mm": 0.6,
+  "note": "perspective is removed using the marker",
+  "short": "0.60 mm, tilted 28°",
+  "order": 1
+ },
+ "synthetic-far-away.jpg": {
+  "label": "Synthetic, shot from too far (3.5 px/mm), true width 0.20 mm",
+  "synthetic": true,
+  "true_width_mm": 0.2,
+  "note": "the agent should ask for a closer photo",
+  "short": "0.20 mm, too far",
+  "order": 2
+ },
+ "synthetic-blurred.jpg": {
+  "label": "Synthetic, defocused, true width 0.50 mm",
+  "synthetic": true,
+  "true_width_mm": 0.5,
+  "note": "the marker edge reveals the blur",
+  "short": "0.50 mm, defocused",
+  "order": 3
+ },
+ "real-038.jpg": {
+  "label": "Real photo 038 (no marker)",
+  "synthetic": false,
+  "source": "Concrete Crack Segmentation Dataset, Özgenel 2019, CC BY 4.0, test split",
+  "note": "no scale reference, so widths stay in pixels",
+  "short": "Real photo 038",
+  "order": 4
+ },
+ "real-191.jpg": {
+  "label": "Real photo 191 (no marker)",
+  "synthetic": false,
+  "source": "Concrete Crack Segmentation Dataset, Özgenel 2019, CC BY 4.0, test split",
+  "note": "no scale reference, so widths stay in pixels",
+  "short": "Real photo 191",
+  "order": 5
+ }
+}

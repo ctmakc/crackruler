@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  CrackRuler - agentic concrete-crack inspection on OpenCV 5. One arm64 (AWS Graviton)
+  Lambda function behind a Lambda Function URL, a private S3 bucket for reports with a
+  short lifecycle, CloudWatch logs/metrics/alarms/dashboard and X-Ray tracing.
+
+Parameters:
+  CodeBucket:
+    Type: String
+    Description: S3 bucket that holds the deployment zip (created by infra/deploy.sh)
+  CodeKey:
+    Type: String
+    Description: S3 key of the deployment zip
+  Architecture:
+    Type: String
+    Default: arm64
+    AllowedValues: [arm64, x86_64]
+    Description: arm64 = AWS Graviton (default). x86_64 only for the A/B latency comparison.
+  FunctionSuffix:
+    Type: String
+    Default: ""
+    Description: Empty for the main stack; e.g. "-x86" for a side-by-side comparison stack.
+  MemorySize:
+    Type: Number
+    Default: 2048
+    AllowedValues: [1024, 1536, 2048, 3008]
+  ReservedConcurrency:
+    Type: Number
+    Default: 0
+    Description: >-
+      Hard cap on concurrent executions (cost guard). 0 = not set. New accounts with a
+      regional limit of 10 cannot reserve concurrency, so the default leaves it unset.
+  ReportRetentionDays:
+    Type: Number
+    Default: 7
+  AlarmEmail:
+    Type: String
+    Default: ""
+    Description: Optional e-mail for the error alarm (SNS). Empty = no notification.
+
+Conditions:
+  HasReserved: !Not [!Equals [!Ref ReservedConcurrency, 0]]
+  HasEmail: !Not [!Equals [!Ref AlarmEmail, ""]]
+
+Resources:
+  ReportBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "crackruler-reports${FunctionSuffix}-${AWS::AccountId}-${AWS::Region}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules: [{ObjectOwnership: BucketOwnerEnforced}]
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-reports
+            Status: Enabled
+            Prefix: reports/
+            ExpirationInDays: !Ref ReportRetentionDays
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/crackruler-inspect${FunctionSuffix}"
+      RetentionInDays: 14
+
+  FunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "crackruler-inspect${FunctionSuffix}-role-${AWS::Region}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: {Service: lambda.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: least-privilege
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !Sub "${LogGroup.Arn}:*"
+              - Effect: Allow
+                Action: [s3:PutObject, s3:GetObject]
+                Resource: !Sub "${ReportBucket.Arn}/reports/*"
+              - Effect: Allow
+                Action: [xray:PutTraceSegments, xray:PutTelemetryRecords]
+                Resource: "*"
+
+  InspectFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "crackruler-inspect${FunctionSuffix}"
+      Description: !Sub "CrackRuler inspection agent (OpenCV 5, ${Architecture})"
+      Runtime: python3.12
+      Architectures: [!Ref Architecture]
+      Handler: app.handler.lambda_handler
+      Code:
+        S3Bucket: !Ref CodeBucket
+        S3Key: !Ref CodeKey
+      MemorySize: !Ref MemorySize
+      Timeout: 60
+      EphemeralStorage: {Size: 512}
+      Role: !GetAtt FunctionRole.Arn
+      TracingConfig: {Mode: Active}
+      ReservedConcurrentExecutions: !If [HasReserved, !Ref ReservedConcurrency, !Ref "AWS::NoValue"]
+      LoggingConfig:
+        LogGroup: !Ref LogGroup
+        LogFormat: Text
+      Environment:
+        Variables:
+          REPORT_BUCKET: !Ref ReportBucket
+          OMP_NUM_THREADS: "2"
+
+  FunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt InspectFunction.Arn
+      AuthType: NONE
+      InvokeMode: BUFFERED
+      Cors:
+        AllowOrigins: ["*"]
+        AllowMethods: [GET, POST]
+        AllowHeaders: [content-type]
+        MaxAge: 3600
+
+  FunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref InspectFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+  FunctionInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref InspectFunction
+      Action: lambda:InvokeFunction
+      Principal: "*"
+      InvokedViaFunctionUrl: true
+
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Condition: HasEmail
+    Properties:
+      TopicName: !Sub "crackruler-alarms${FunctionSuffix}"
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref AlarmEmail
+
+  ErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "crackruler-inspect${FunctionSuffix}-errors"
+      AlarmDescription: Lambda errors or throttles on the inspection endpoint
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{Name: FunctionName, Value: !Ref InspectFunction}]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: !If [HasEmail, [!Ref AlarmTopic], !Ref "AWS::NoValue"]
+
+  Dashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub "crackruler${FunctionSuffix}"
+      DashboardBody: !Sub |
+        {"widgets":[
+          {"type":"metric","x":0,"y":0,"width":12,"height":6,"properties":{"title":"Inspection latency (ms)","region":"${AWS::Region}",
+            "metrics":[[{"expression":"SEARCH('{CrackRuler,Action} MetricName=\"LatencyMs\"', 'p50', 300)","id":"e1"}]],"view":"timeSeries"}},
+          {"type":"metric","x":12,"y":0,"width":12,"height":6,"properties":{"title":"Inspections by action","region":"${AWS::Region}",
+            "metrics":[[{"expression":"SEARCH('{CrackRuler,Action} MetricName=\"Inspections\"', 'Sum', 300)","id":"e2"}]],"view":"timeSeries","stacked":true}},
+          {"type":"metric","x":0,"y":6,"width":12,"height":6,"properties":{"title":"Lambda","region":"${AWS::Region}",
+            "metrics":[["AWS/Lambda","Invocations","FunctionName","${InspectFunction}"],[".","Errors",".","."],[".","Throttles",".","."]],"stat":"Sum","period":300}},
+          {"type":"metric","x":12,"y":6,"width":12,"height":6,"properties":{"title":"Lambda duration (ms)","region":"${AWS::Region}",
+            "metrics":[["AWS/Lambda","Duration","FunctionName","${InspectFunction}",{"stat":"p50"}],["...",{"stat":"p95"}]],"period":300}}
+        ]}
+
+Outputs:
+  EndpointUrl:
+    Description: Public inspector UI and API
+    Value: !GetAtt FunctionUrl.FunctionUrl
+  ReportBucketName:
+    Value: !Ref ReportBucket
+  FunctionName:
+    Value: !Ref InspectFunction

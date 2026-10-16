@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CrackRuler · crack widths in millimetres</title>
+<meta name="description" content="Photograph a concrete crack next to a printed marker. CrackRuler finds the crack with OpenCV 5, measures its width in millimetres and tells you whether an engineer needs to look.">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/fonts.css">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="no-js">
+<a class="skip" href="#evidence">Skip to results</a>
+
+<header class="mast">
+  <div class="mast-in">
+    <h1 class="mark"><span class="mask"><span>Crack</span></span><span class="mask"><span class="thin">Ruler</span></span></h1>
+    <p class="claim">Photograph a concrete crack next to a printed marker. Get its width in millimetres and a clear next step.</p>
+    <nav class="mast-nav" aria-label="Project">
+      <a href="#how">How it works</a>
+      <a href="https://github.com/ctmakc/crackruler" rel="noopener">Source</a>
+      <a href="/static/marker-50mm.svg" download>Printable marker</a>
+    </nav>
+  </div>
+</header>
+
+<main class="split">
+  <section class="inputs" aria-labelledby="in-h">
+    <h2 id="in-h" class="sr">Inspection inputs</h2>
+
+    <fieldset class="block" data-stagger>
+      <legend><span class="n">1</span> Photo</legend>
+      <label class="drop" id="drop">
+        <input id="file" type="file" accept="image/jpeg,image/png" capture="environment">
+        <span class="drop-t">Drop a photo or tap to choose</span>
+        <span class="drop-s">JPEG or PNG. Keep the marker flat on the surface, in the same plane as the crack.</span>
+        <img id="thumb" alt="" hidden>
+      </label>
+      <p class="or">or try a sample</p>
+      <ul class="samples" id="samples" aria-label="Sample photos"></ul>
+    </fieldset>
+
+    <fieldset class="block" data-stagger>
+      <legend><span class="n">2</span> Exposure</legend>
+      <p class="hint">Sets the width the crack is compared with. Values from ACI 224R-01, Table 4.1.</p>
+      <div class="exp" id="exp" role="radiogroup" aria-label="Exposure condition"></div>
+    </fieldset>
+
+    <fieldset class="block" data-stagger>
+      <legend><span class="n">3</span> Marker</legend>
+      <label class="row-in" for="mm">
+        <span>Black square side</span>
+        <span class="num"><input id="mm" type="number" min="5" max="500" step="0.1" value="50" inputmode="decimal"><i>mm</i></span>
+      </label>
+      <p class="hint">Print <a href="/static/marker-50mm.svg" download>the marker</a> at 100&nbsp;%, measure the black square with a ruler and enter what you measured.</p>
+    </fieldset>
+
+    <div class="go" data-stagger>
+      <button id="run" class="btn" type="button" disabled>Measure cracks</button>
+      <p class="status" id="status" role="status" aria-live="polite">Choose a photo or a sample.</p>
+    </div>
+  </section>
+
+  <section class="evidence" id="evidence" aria-labelledby="ev-h" tabindex="-1">
+    <h2 id="ev-h" class="sr">Results</h2>
+
+    <div class="empty" id="empty">
+      <p class="empty-lead">What you get</p>
+      <ol class="ruled">
+        <li><b>Width in millimetres</b><span>along the whole crack, from a printed ArUco marker that fixes scale and removes camera tilt</span></li>
+        <li><b>A comparator reading</b><span>each crack plotted against the guideline width for its exposure</span></li>
+        <li><b>A next step</b><span>log, monitor, engineer review, or retake, with the reason</span></li>
+        <li><b>The agent's trace</b><span>every OpenCV tool it ran, what it saw and why it chose the next one</span></li>
+      </ol>
+      <div class="card-gauge preview">
+        <h3>Comparator</h3>
+        <div id="gauge-preview" class="gauge" role="img"></div>
+        <p class="legend">Reference lines are drawn at their relative thickness. The notch is the guideline for the exposure you picked.</p>
+      </div>
+    </div>
+
+    <div class="result" id="result" hidden>
+      <div class="verdict" id="verdict">
+        <p class="v-word"><span id="v-word"></span></p>
+        <p class="v-reason" id="v-reason"></p>
+        <p class="v-next"><span class="chip" id="v-human" hidden>Needs a person</span><span id="v-next"></span></p>
+      </div>
+
+      <figure class="photo">
+        <img id="ann" alt="Annotated inspection photo">
+        <figcaption id="ann-cap"></figcaption>
+      </figure>
+
+      <div class="card-gauge">
+        <h3>Comparator</h3>
+        <div id="gauge" class="gauge" role="img"></div>
+        <p class="legend"><span class="lg tick"></span> p95 width of each crack, bar = 95&nbsp;% uncertainty <span class="lg notch"></span> exposure guideline</p>
+      </div>
+
+      <div class="table-wrap">
+        <h3>Cracks</h3>
+        <table class="cracks" id="cracks">
+          <thead><tr><th scope="col">#</th><th scope="col">Length</th><th scope="col">Median</th><th scope="col">p95</th><th scope="col">Max</th><th scope="col">Second detector</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="trace-wrap">
+        <h3>Agent trace <button class="link" id="replay" type="button">replay</button></h3>
+        <ol class="trace" id="trace"></ol>
+        <p class="dl"><a id="json" href="#" download="crackruler-report.json">Download the report (JSON)</a></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section class="how" id="how" aria-labelledby="how-h">
+  <div class="how-in">
+    <h2 id="how-h">How it works</h2>
+    <ol class="ruled steps">
+      <li><b>Quality gate</b><span>sharpness and exposure of the frame; a blurred frame ends in a retake request.</span></li>
+      <li><b>Scale and plane</b><span>OpenCV 5 <code>aruco.ArucoDetector</code> finds the marker with sub-pixel corners; a homography makes the surface fronto-parallel at the marker's native pixel density. The marker edge doubles as a blur probe (10&ndash;90&nbsp;% edge rise gives the optical sigma).</span></li>
+      <li><b>Find</b><span>a small U-Net (1.56&nbsp;M parameters, ONNX) runs in the OpenCV 5 DNN engine on a 1024&nbsp;px view; a classical multi-scale Hessian ridge detector runs as an independent second opinion.</span></li>
+      <li><b>Measure</b><span>on the full-resolution rectified image: centreline by thinning, grey-level profiles across the crack every few pixels with <code>cv.remap</code>, full width at half depth, then a blur model inverts the optics. Widths the optics cannot resolve are reported as upper bounds.</span></li>
+      <li><b>Decide</b><span>the widest confirmed crack (95th percentile along its length) against the ACI 224R-01 guideline for the chosen exposure, with uncertainty. Too close to call, unconfirmed, or unresolvable cases go to a person.</span></li>
+    </ol>
+    <div class="facts" id="facts"></div>
+    <p class="caveat">ACI 224R-01 Table 4.1 is a design guideline for new construction under service loads. ACI notes that a portion of cracks will exceed it. CrackRuler uses it to route a finding, never to certify a structure as safe. Photos you upload are processed in memory and are not stored; only the report and the annotated image are kept for 7 days.</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <p class="foot-w">CrackRuler</p>
+  <p class="foot-m">OpenCV <span id="cvv">5</span> · AWS Lambda arm64 · Apache-2.0 · Training data: Concrete Crack Segmentation Dataset, Ç. F. Özgenel (2019), CC BY 4.0</p>
+  <p class="mmix"><a href="https://mmix.biz/ai-systems" rel="noopener">Development &amp; promotion — <img src="/static/mmix-logo.png" alt="MMIX — Marketing Mix" width="36" height="35"></a></p>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

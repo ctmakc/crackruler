@@ -1,0 +1,17 @@
+{
+ "local": "x86_64",
+ "threads": 2,
+ "n": 9,
+ "server_ms_median": 946.0,
+ "rtt_ms_median": null,
+ "per_tool_ms_median": {
+  "assess_quality": 8.0,
+  "find_marker": 30.2,
+  "rectify": 72.6,
+  "segment": 376.8,
+  "cross_check": 9.3,
+  "measure": 58.6,
+  "check_resolution": 0.0,
+  "decide": 0.0
+ }
+}
