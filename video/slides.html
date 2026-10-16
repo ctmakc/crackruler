@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>CrackRuler slides</title>
+<style>
+@font-face{font-family:'Saira Condensed';font-weight:300;src:url(../app/static/SairaCondensed-300.woff2)}
+@font-face{font-family:'Saira Condensed';font-weight:700;src:url(../app/static/SairaCondensed-700.woff2)}
+@font-face{font-family:'Public Sans';font-weight:400 800;src:url(../app/static/PublicSans.woff2)}
+@font-face{font-family:'Martian Mono';font-weight:400 600;src:url(../app/static/MartianMono.woff2)}
+:root{--c:#D9DAD5;--s:#E3E4DF;--ink:#1E2120;--dim:#4A4F4C;--hair:#A9ACA5;--cr:#F2C200;--over:#B3302A}
+*{box-sizing:border-box;margin:0}
+body{width:1920px;height:1080px;background:var(--c);color:var(--ink);font:400 30px/1.45 'Public Sans',sans-serif;overflow:hidden}
+.s{display:none;width:1920px;height:1080px;padding:110px 140px}
+.s.on{display:block}
+.mark{font:700 230px/.85 'Saira Condensed';text-transform:uppercase;display:flex;gap:.05em}
+.mark .t{font-weight:300}
+h2{font:700 96px/.95 'Saira Condensed';text-transform:uppercase;margin-bottom:50px}
+.lead{font-size:44px;line-height:1.3;max-width:28ch;margin-top:60px}
+.meta{font:400 24px 'Martian Mono';color:var(--dim);margin-top:70px}
+.band{background:linear-gradient(var(--cr),var(--cr)) no-repeat 0 85%/100% .3em}
+.fig{width:100%;height:820px;object-fit:contain;object-position:left top}
+.fig2{width:100%;height:930px;object-fit:contain;object-position:center top}
+table{border-collapse:collapse;width:100%;font-size:30px}
+td,th{padding:20px 20px 20px 0;border-bottom:1px solid var(--hair);text-align:left;vertical-align:top}
+th{font:600 22px 'Martian Mono';color:var(--dim);border-bottom:2px solid var(--ink)}
+td b{font:700 64px/1 'Saira Condensed'}
+.tag{font:600 20px 'Martian Mono';border:2px solid var(--ink);padding:2px 8px;margin-left:10px;vertical-align:6px}
+ul{list-style:none;padding:0;max-width:62ch}
+li{padding:22px 0;border-top:1px solid var(--hair);font-size:34px}
+li:last-child{border-bottom:1px solid var(--hair)}
+.url{font:600 30px 'Martian Mono';margin-top:50px}
+</style></head><body>
+<section class="s" id="title">
+  <h1 class="mark"><span>Crack</span><span class="t">Ruler</span></h1>
+  <p class="lead">Concrete crack widths <span class="band">in millimetres</span> from one phone photo and a printed marker.</p>
+  <p class="meta">Maksym Stepanenko · INNOVA CONSULT LTD, Ottawa · OpenCV AI Competition 2026, powered by AWS</p>
+</section>
+<section class="s" id="architecture"><img class="fig2" src="../docs/architecture.png" alt=""></section>
+<section class="s" id="agent-loop"><img class="fig2" src="../docs/agent-loop.png" alt=""></section>
+<section class="s" id="results">
+  <h2>Results</h2>
+  <table>
+    <tr><th>test</th><th>data</th><th>result</th></tr>
+    <tr><td>Crack pixels, U-Net in OpenCV 5 DNN</td><td>69 held-out real photos</td><td><b>F1 0.937</b><br>IoU 0.757</td></tr>
+    <tr><td>Crack pixels, classical ridge filter</td><td>same 69 photos</td><td><b>F1 0.930</b><br>IoU 0.696</td></tr>
+    <tr><td>Width in mm, end to end<span class="tag">SYNTHETIC</span></td><td>84 scenes, known width,<br>0–30° tilt, blur, JPEG</td><td><b>≤ 0.045 mm</b><br>mean error, cracks ≥ 2.4 px across</td></tr>
+    <tr><td>Where it fails</td><td>cracks under ~2 px across</td><td>overestimated → review;<br>0.1 mm not detected</td></tr>
+  </table>
+</section>
+<section class="s" id="close">
+  <h2>Limits and responsible use</h2>
+  <ul>
+    <li>Metric accuracy is measured on synthetic scenes; field photos with comparator-card readings come next.</li>
+    <li>ACI 224R-01 Table 4.1 routes a finding. It never certifies a structure as safe.</li>
+    <li>Photos are processed in memory and never stored; reports expire after 7 days.</li>
+    <li>Every wide, uncertain or unresolvable case ends with a person.</li>
+  </ul>
+  <p class="url">github.com/ctmakc/crackruler</p>
+</section>
+<script>const id=(location.hash||'#title').slice(1);document.getElementById(id).classList.add('on')</script>
+</body></html>
