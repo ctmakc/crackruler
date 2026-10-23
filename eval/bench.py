@@ -15,7 +15,7 @@ if len(sys.argv) > 1:
             rtt.append((time.perf_counter() - t0) * 1000)
             total.append(rep["server_ms"])
             for t in rep["trace"]:
-                per_tool.setdefault(t["tool"], []).append(t.get("ms", 0))
+                per_tool.setdefault(t["tool"] + ("·" + t["args"]["method"] if t.get("args", {}).get("method") else ""), []).append(t.get("ms", 0))
     where = {"endpoint": sys.argv[1], "arch": rep.get("arch")}
 else:
     import cv2 as cv
@@ -26,7 +26,7 @@ else:
             rep = Inspection().run(img)
             total.append(rep["elapsed_ms"])
             for t in rep["trace"]:
-                per_tool.setdefault(t["tool"], []).append(t.get("ms", 0))
+                per_tool.setdefault(t["tool"] + ("·" + t["args"]["method"] if t.get("args", {}).get("method") else ""), []).append(t.get("ms", 0))
     import platform
     where = {"local": platform.machine(), "threads": cv.getNumThreads()}
 out = {**where, "n": len(total), "server_ms_median": round(statistics.median(total), 1),

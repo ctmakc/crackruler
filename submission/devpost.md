@@ -6,7 +6,7 @@
 
 **Built with:** opencv, python, onnx, pytorch, numpy, aws-lambda, amazon-s3, amazon-cloudwatch, aws-cloudformation, aws-x-ray, aws-graviton, javascript, html5, css3
 
-**Links:** Try it out: <FUNCTION_URL> · Code: https://github.com/ctmakc/crackruler · Technical report: https://github.com/ctmakc/crackruler/blob/main/docs/TECHNICAL_REPORT.md
+**Links:** Try it out: https://hwytllvqjarqppbcobgqs25lia0hywlx.lambda-url.us-east-1.on.aws/ · Code: https://github.com/ctmakc/crackruler · Technical report: https://github.com/ctmakc/crackruler/blob/main/docs/TECHNICAL_REPORT.md
 
 **Video:** <YOUTUBE_URL>
 
@@ -29,7 +29,7 @@ You print a 50 mm ArUco marker, put it flat next to the crack, take a photo and 
 - **Two detectors.** A 1.56 M-parameter U-Net, trained in PyTorch on the CC BY 4.0 Concrete Crack Segmentation Dataset and exported to ONNX, runs inside the OpenCV 5 DNN engine (`dnn.readNetFromONNX`, PyTorch parity 9e-5). A classical multi-scale Hessian ridge filter built from `Sobel` second derivatives gives an independent second opinion.
 - **Width measurement.** Centreline by `ximgproc.thinning`, grey-level profiles across the crack sampled at 0.25 px with `remap` on the full-resolution rectified image, full width at half depth, then an erf blur model inverted with the sigma measured on the marker. Widths the optics cannot resolve are reported as upper bounds.
 - **The agent.** A deterministic planner reads each tool's output and picks the next tool. Blur, a missing marker, disagreement between the detectors, or too few pixels across the crack each change its next step; every uncertain case ends with a person. Each step is logged with its observation and timing.
-- **AWS.** One Lambda function (Python 3.12, arm64 Graviton, 2048 MB) behind a Lambda Function URL serves the UI and the API. Reports and annotated images go to a private, encrypted S3 bucket that expires them after 7 days; the uploaded photo is never stored. CloudWatch gets structured logs, Embedded Metric Format metrics, a dashboard and an error alarm; X-Ray traces every call. One CloudFormation template deploys it, and the arm64 zip builds on any machine with `pip --platform` (no Docker). An AWS Budget alert guards the account.
+- **AWS.** One Lambda function (Python 3.12, arm64 Graviton, 512 MB) behind a Lambda Function URL serves the UI and the API. To fit 512 MB, the U-Net runs on overlapping 512 px windows; on the 69 test photos the result is the same as a single pass. Reports and annotated images go to a private, encrypted S3 bucket that expires them after 7 days; the uploaded photo is never stored. CloudWatch gets structured logs, Embedded Metric Format metrics, a dashboard and an error alarm; X-Ray traces every call. One CloudFormation template deploys it, and the arm64 zip builds on any machine with `pip --platform` (no Docker). An AWS Budget alert guards the account.
 
 ## Evaluation (all scripts and outputs in the repo)
 - 69 held-out real photos: U-Net pixel F1 0.937 (2 px tolerance), IoU 0.757; classical detector F1 0.930.
@@ -38,6 +38,8 @@ You print a 50 mm ArUco marker, put it flat next to the crack, take a photo and 
 
 ## Challenges we ran into
 Blur makes thin cracks look wider, so a naive width is biased exactly where the decision matters. Measuring the blur on the marker itself and inverting it fixed most of the bias and also told the agent when a photo cannot resolve the guideline at all.
+
+Our new AWS account allows 512 MB per Lambda function. The single-pass U-Net needed about 650 MB, so we split it into overlapping windows clipped at the image edge; peak memory on Lambda is now 446 MB and the test-set F1 did not change. The price is speed: an inspection takes about 23 s on arm64 and 11 s on an x86 twin we deployed for comparison. The classical OpenCV tools run at about the same speed on both; the U-Net step is 2.5 times slower with the stock aarch64 wheel. The numbers are in the report, and the x86 twin stays online for comparison.
 
 ## Accomplishments that we're proud of
 The whole chain is honest about its limits: synthetic results are labelled, widths below resolution are upper bounds, unconfirmed detections are shown as such, and the system asks for a closer photo with a concrete factor computed from the measured pixel density.

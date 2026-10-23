@@ -36,7 +36,7 @@ STATIC = os.path.join(HERE, "static")
 SAMPLES = os.path.join(ROOT, "samples")
 BUCKET = os.environ.get("REPORT_BUCKET")
 MAX_BYTES = 8 * 1024 * 1024
-MAX_PIXELS = 26_000_000
+MAX_PIXELS = int(os.environ.get("MAX_PIXELS", "26000000"))   # 12.6 MP on a 512 MB Lambda
 COLD = True
 _s3 = None
 
@@ -81,7 +81,7 @@ def _decode(b: bytes):
     if img is None:
         raise ValueError("could not decode image")
     if img.shape[0] * img.shape[1] > MAX_PIXELS:
-        raise ValueError("image has more than 26 megapixels")
+        raise ValueError(f"image has more than {MAX_PIXELS / 1e6:.1f} megapixels")
     return img
 
 

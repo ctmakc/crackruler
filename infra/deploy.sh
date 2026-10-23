@@ -14,7 +14,8 @@ ART="crackruler-artifacts-${ACCOUNT}-${REGION}"
 ARCH=${ARCH:-arm64}
 SUFFIX=${SUFFIX:-}
 ZIP=$(ARCH=$ARCH infra/build.sh | tail -1)
-KEY="lambda/$(basename "$ZIP")"
+# content hash in the key: a rebuilt zip always reaches the function, even without a new commit
+KEY="lambda/$(basename "$ZIP" .zip)-$(sha256sum "$ZIP" | cut -c1-10).zip"
 
 if ! aws s3api head-bucket --bucket "$ART" 2>/dev/null; then
   if [ "$REGION" = "us-east-1" ]; then
@@ -33,7 +34,7 @@ aws s3 cp --only-show-errors "$ZIP" "s3://$ART/$KEY"
 aws cloudformation deploy --region "$REGION" --stack-name "$STACK" \
   --template-file infra/template.yaml --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides CodeBucket="$ART" CodeKey="$KEY" AlarmEmail="${ALARM_EMAIL:-}" \
-    Architecture="$ARCH" FunctionSuffix="$SUFFIX" \
+    Architecture="$ARCH" FunctionSuffix="$SUFFIX" MemorySize="${MEMORY:-512}" \
   --no-fail-on-empty-changeset
 
 URL=$(aws cloudformation describe-stacks --region "$REGION" --stack-name "$STACK" \

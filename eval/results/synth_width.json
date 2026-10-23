@@ -212,7 +212,7 @@
     "px_across": 1.6,
     "bias_mm": 0.061,
     "mae_mm": 0.061,
-    "rel_mae": 0.305
+    "rel_mae": 0.306
    },
    "0.2mm@12ppm": {
     "n": 4,
@@ -250,9 +250,9 @@
     "n": 4,
     "measured": 4,
     "px_across": 2.5,
-    "bias_mm": 0.024,
-    "mae_mm": 0.027,
-    "rel_mae": 0.053
+    "bias_mm": 0.023,
+    "mae_mm": 0.025,
+    "rel_mae": 0.05
    },
    "0.5mm@8ppm": {
     "n": 4,
@@ -298,8 +298,8 @@
     "n": 4,
     "measured": 4,
     "px_across": 6.0,
-    "bias_mm": 0.028,
-    "mae_mm": 0.028,
+    "bias_mm": 0.029,
+    "mae_mm": 0.029,
     "rel_mae": 0.024
    },
    "1.2mm@8ppm": {
@@ -602,7 +602,7 @@
    "px_across": 0.98,
    "other_confirmed": 0,
    "agent_p50_mm": 0.323,
-   "agent_len_mm": 179.9
+   "agent_len_mm": 180.8
   },
   {
    "width_mm": 0.2,
@@ -635,8 +635,8 @@
    "oracle_p50_mm": 0.272,
    "px_across": 1.58,
    "other_confirmed": 0,
-   "agent_p50_mm": 0.247,
-   "agent_len_mm": 147.4
+   "agent_p50_mm": 0.248,
+   "agent_len_mm": 146.9
   },
   {
    "width_mm": 0.2,
@@ -958,8 +958,8 @@
    "oracle_p50_mm": 0.5513,
    "px_across": 2.41,
    "other_confirmed": 0,
-   "agent_p50_mm": 0.533,
-   "agent_len_mm": 224.5
+   "agent_p50_mm": 0.527,
+   "agent_len_mm": 224.8
   },
   {
    "width_mm": 0.5,
@@ -1282,7 +1282,7 @@
    "px_across": 6.64,
    "other_confirmed": 0,
    "agent_p50_mm": 0.817,
-   "agent_len_mm": 202.4
+   "agent_len_mm": 203.2
   },
   {
    "width_mm": 0.8,
@@ -1417,7 +1417,7 @@
    "oracle_p50_mm": 1.2273,
    "px_across": 6.21,
    "other_confirmed": 0,
-   "agent_p50_mm": 1.227,
+   "agent_p50_mm": 1.228,
    "agent_len_mm": 127.4
   },
   {

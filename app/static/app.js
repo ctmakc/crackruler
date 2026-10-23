@@ -94,7 +94,7 @@
     const body = { exposure, marker_mm };
     if (state.sample) body.sample = state.sample; else if (state.image) body.image_b64 = state.image; else return;
     btn.disabled = true; btn.classList.add("busy"); btn.textContent = "Measuring…";
-    status("Running the inspection agent…");
+    status("Running the inspection agent on AWS Lambda, about 10-25 seconds…");
     const t0 = performance.now();
     try {
       const r = await fetch("/api/inspect", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });

@@ -52,8 +52,33 @@ def dnn_available() -> bool:
     return _net() is not None
 
 
+# Tiled inference keeps the DNN engine's working memory bounded (AWS Lambda at 512 MB):
+# each tile is TILE px of context, of which the central TILE - 2*MARGIN px are kept.
+DNN_TILE = int(os.environ.get("CRACKRULER_DNN_TILE", "512"))     # 0 = whole image in one pass
+DNN_MARGIN = int(os.environ.get("CRACKRULER_DNN_MARGIN", "64"))
+
+
 def dnn_map(bgr: np.ndarray) -> np.ndarray:
-    """U-Net crack probability. Input any size; padded to a multiple of 16."""
+    """U-Net crack probability. Input any size. Images larger than one tile are processed in
+    overlapping windows; only the centre of each window is kept, so every output pixel away from
+    the image edge sees at least DNN_MARGIN px of real context on each side. Windows are clipped
+    to the image, so the image edges are handled exactly as in a single pass."""
+    h, w = bgr.shape[:2]
+    if DNN_TILE <= 0 or (h <= DNN_TILE and w <= DNN_TILE):
+        return _dnn_once(bgr)
+    core, m = DNN_TILE - 2 * DNN_MARGIN, DNN_MARGIN
+    out = np.zeros((h, w), np.float32)
+    for y in range(0, h, core):
+        for x in range(0, w, core):
+            y1, x1 = min(y + core, h), min(x + core, w)
+            wy, wx = max(0, y - m), max(0, x - m)
+            win = bgr[wy:min(h, y1 + m), wx:min(w, x1 + m)]
+            out[y:y1, x:x1] = _dnn_once(win)[y - wy:y1 - wy, x - wx:x1 - wx]
+    return out
+
+
+def _dnn_once(bgr: np.ndarray) -> np.ndarray:
+    """One forward pass; the input is padded to a multiple of 16."""
     net = _net()
     if net is None:
         raise RuntimeError("ONNX model not found: " + MODEL_PATH)

@@ -42,7 +42,10 @@ next under the exposure the element lives in.
 
 - **Client:** static HTML/CSS/JS served by the same function, no third-party scripts, CSP
   `default-src 'self'`, self-hosted OFL fonts, light and dark themes, works on phones.
-- **Compute:** one AWS Lambda function, Python 3.12, **arm64 (AWS Graviton)**, 2048 MB, 60 s timeout.
+- **Compute:** one AWS Lambda function, Python 3.12, **arm64 (AWS Graviton)**, 512 MB, 60 s timeout.
+  512 MB is the per-function cap on our new AWS account. To fit it, the U-Net runs on 512 px windows
+  (384 px kept, 64 px of context on each side, windows clipped at the image edge); on the 69 test photos
+  this gives the same F1 as a single pass (0.937), and the peak memory on Lambda is 446 MB.
   Package: OpenCV 5.0.0 (`opencv-contrib-python-headless==5.0.0.93`), numpy 2.5.4, the ONNX model
   (6.2 MB) and the app; 62 MB zipped, 152 MB unzipped. It is built without Docker: `pip --platform
   manylinux_2_28_aarch64` fetches the Arm wheels on any machine.
@@ -57,7 +60,8 @@ next under the exposure the element lives in.
   Lambda errors with optional SNS e-mail; X-Ray active tracing.
 - **Security:** the execution role can only write logs, `s3:PutObject/GetObject` on `reports/*` of
   its own bucket, and send X-Ray segments. The deployer policy is scoped to `crackruler*`
-  resources. Input validation: JPEG/PNG magic bytes, 8 MB and 26 MP limits, a sample-name allow-list,
+  resources. Input validation: JPEG/PNG magic bytes, 8 MB and pixel limits (12.6 MP on the deployed
+  512 MB function, set by the `MAX_PIXELS` variable), a sample-name allow-list,
   numeric bounds on the marker size, and an exposure allow-list. Unexpected failures return a
   reference id and are logged; they do not leak stack traces.
 - **Infrastructure as code:** `infra/template.yaml` (CloudFormation, passes `cfn-lint`), `deploy.sh`,
@@ -175,10 +179,11 @@ validation (F1 0.956), and everything below was measured once on test.
 
 | Detector | Precision | Recall | F1 (2 px tol.) | IoU (strict) | per-photo F1 median / p10 | time / photo |
 |---|---|---|---|---|---|---|
-| U-Net, OpenCV 5 DNN | 0.916 | 0.959 | **0.937** | **0.757** | 0.963 / 0.866 | 479 ms* |
-| Hessian ridge (classical) | 0.957 | 0.904 | 0.930 | 0.696 | 0.956 / 0.828 | 140 ms* |
+| U-Net, OpenCV 5 DNN | 0.917 | 0.959 | **0.937** | **0.757** | 0.963 / 0.866 | 1385 ms* |
+| Hessian ridge (classical) | 0.957 | 0.904 | 0.930 | 0.696 | 0.956 / 0.828 | 212 ms* |
 
-\* one x86 desktop CPU, all threads; Lambda timings in section 8.
+\* one x86 desktop CPU capped at 6 cores while other jobs ran, U-Net in 512 px windows as deployed
+(479 ms as a single pass on an idle machine); Lambda timings in section 8.
 
 ### 7.3 Crack / no crack on patches
 
@@ -241,17 +246,30 @@ HTTP routing including path traversal and a non-image upload.
 
 ## 8. AWS deployment, latency and cost
 
-Region us-east-1, stack `crackruler`. Measured with `eval/bench.py` against the live endpoint:
+Region us-east-1, stack `crackruler`, live endpoint
+https://hwytllvqjarqppbcobgqs25lia0hywlx.lambda-url.us-east-1.on.aws/ . Measured on 22 Oct 2026 with
+`N=3 python eval/bench.py <url>`:
 
 | Configuration | median server time per inspection | notes |
 |---|---|---|
 | local x86 desktop, 2 threads | 946 ms | reference, `eval/results/bench_local_x86_2threads.json` |
 | AWS Lambda emulator (x86_64 zip, AL2023 image) | 830-1030 ms | same package format as the deployment |
-| Lambda arm64 (Graviton), 2048 MB | *to be measured after deployment* | `eval/results/bench_lambda_arm64.json` |
-| Lambda x86_64, 2048 MB (A/B twin) | *to be measured after deployment* | `eval/results/bench_lambda_x86.json` |
+| Lambda arm64 (Graviton), 512 MB | 22 717 ms (U-Net step 20 553 ms) | `eval/results/bench_lambda_arm64.json` |
+| Lambda x86_64, 512 MB (A/B twin, same code built for x86) | 10 638 ms (U-Net step 8 260 ms) | `eval/results/bench_lambda_x86.json` |
 
-Monthly cost at demo traffic (a few hundred inspections): Lambda at ~2 GB × ~1 s per inspection is
-about 2 GB-s each, far inside the always-free 400 000 GB-s and 1 M requests; S3 holds a few MB that
+Both stacks were benchmarked at the same time (3 samples × 3 warm runs each, run in parallel).
+At 512 MB a Lambda function gets a fraction of one vCPU, so an inspection takes 10-23 s instead of
+about 1 s on a desktop; the UI says so while it runs. The A/B result: the OpenCV tools other than the
+DNN run at about the same speed on both (marker search 278 vs 210 ms, rectification 299 vs 340 ms,
+ridge detector 701 vs 760 ms, measurement 316 vs 321 ms), while the U-Net in the OpenCV 5 DNN engine
+is 2.5 times slower with the stock `opencv-contrib-python-headless` aarch64 wheel. At the Lambda list
+prices (arm64 $0.0000133334, x86 $0.0000166667 per GB-s) one inspection costs about $0.00015 on arm64
+and $0.00009 on x86. We keep arm64 as the main stack, keep the x86 twin running for comparison
+(https://xukarr3uxip3mzgheucpfgxqfm0uzthb.lambda-url.us-east-1.on.aws/ , faster today), and list a
+faster Arm inference path (COOL, or an Arm-optimised DNN backend) as next work.
+
+Monthly cost at demo traffic (a few hundred inspections): one inspection is about 0.5 GB × 23 s =
+11.4 GB-s on arm64, so the always-free 400 000 GB-s cover roughly 35 000 inspections a month, with 1 M free requests; S3 holds a few MB that
 expire after 7 days; CloudWatch logs stay within the free 5 GB. Expected bill: $0.00-$0.10 per month,
 covered by AWS credits.
 

@@ -43,7 +43,7 @@ def main():
     health = json.load(urllib.request.urlopen(BASE + "/api/health", timeout=60))
     print("endpoint", BASE, health["arch"], health["opencv"], flush=True)
     check_expectations()
-    clips, subs, t = [], [], 0.0
+    clips, subs, notes, t = [], [], [], 0.0
     for i, s in enumerate(SCENES):
         mp3 = os.path.join(OUT, f"{i:02d}-{s['id']}.mp3")
         if not os.path.exists(mp3):
@@ -72,8 +72,17 @@ await p.goto('file://{HERE}/slides.html#{s["slide"]}');await p.waitForTimeout(60
                     "out_dir": os.path.join(OUT, "raw")}
             res = json.loads(run(["node", os.path.join(HERE, "record.cjs"), json.dumps(spec)],
                                  env={**os.environ, "NODE_PATH": NODE_PATH}).strip().splitlines()[-1])
-            run(["ffmpeg", "-y", "-ss", f"{res['mark']:.3f}", "-i", res["video"], "-i", mp3, "-filter_complex",
-                 f"[0:v]fps=30,scale=1920:1080,tpad=stop_mode=clone:stop_duration=5,format=yuv420p[v];"
+            if res.get("cut"):
+                a, b = res["cut"]
+                wait = b - a + 1.7
+                vsrc = (f"[0:v]split[s1][s2];[s1]trim=start={res['mark']:.3f}:end={a:.3f},setpts=PTS-STARTPTS[va];"
+                        f"[s2]trim=start={b:.3f},setpts=PTS-STARTPTS[vb];[va][vb]concat=n=2:v=1:a=0,")
+                notes.append((t + a - res["mark"], t + a - res["mark"] + 2.5,
+                              f"{wait:.0f} s on AWS Lambda, wait shortened in this video"))
+            else:
+                vsrc = f"[0:v]trim=start={res['mark']:.3f},setpts=PTS-STARTPTS,"
+            run(["ffmpeg", "-y", "-i", res["video"], "-i", mp3, "-filter_complex",
+                 f"{vsrc}fps=30,scale=1920:1080,tpad=stop_mode=clone:stop_duration=5,format=yuv420p[v];"
                  f"[1:a]adelay={int(LEAD*1000)}|{int(LEAD*1000)},apad[a]", "-map", "[v]", "-map", "[a]",
                  "-t", f"{total:.3f}", "-r", "30", "-c:v", "libx264", "-preset", "medium", "-crf", "20",
                  "-c:a", "aac", "-b:a", "160k", "-ar", "48000", clip])
@@ -105,11 +114,14 @@ await p.goto('file://{HERE}/slides.html#{s["slide"]}');await p.waitForTimeout(60
     with open(ass, "w") as f:
         f.write("[Script Info]\nScriptType: v4.00+\nPlayResX: 1920\nPlayResY: 1080\n\n[V4+ Styles]\n"
                 "Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV\n"
-                "Style: Default,Noto Sans,38,&H00E0E5E4,&H00202120,&HB0202120,0,3,10,0,2,160,160,48\n\n"
+                "Style: Default,Noto Sans,38,&H00E0E5E4,&H00202120,&HB0202120,0,3,10,0,2,160,160,48\n"
+                "Style: Note,Noto Sans,32,&H00202120,&H0000C2F2,&H0000C2F2,0,3,10,0,9,60,60,40\n\n"
                 "[Events]\nFormat: Layer, Start, End, Style, Text\n")
         for a, b, x in subs:
             cs = lambda v: f"{int(v//3600)}:{int(v//60%60):02d}:{v%60:05.2f}"
             f.write(f"Dialogue: 0,{cs(a)},{cs(b)},Default,{x}\n")
+        for a, b, x in notes:
+            f.write(f"Dialogue: 1,{cs(a)},{cs(b)},Note,{x}\n")
     final = os.path.join(OUT, "crackruler_demo.mp4")
     fontsdir = os.path.join(os.path.dirname(HERE), "app", "static")
     run(["ffmpeg", "-y", "-i", joined, "-vf", f"subtitles={ass}", "-c:v", "libx264", "-preset", "medium",

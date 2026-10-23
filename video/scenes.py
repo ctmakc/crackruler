@@ -3,13 +3,14 @@ make_video.py checks every 'expect' value against the endpoint's actual report b
 
 SCENES = [
     {"id": "title", "kind": "slide", "slide": "title",
-     "say": "CrackRuler. I'm Maksym Stepanenko from INNOVA CONSULT in Ottawa. Inspectors decide what happens "
+     "say": "CrackRuler, built by Maksym Stepanenko of INNOVA CONSULT in Ottawa. Inspectors decide what happens "
             "to a concrete wall or a bridge deck by the width of its cracks. Today they read that width with a "
             "plastic card and write it on a form. CrackRuler gets it in millimetres from one phone photo and a printed marker."},
     {"id": "ui", "kind": "live", "action": "intro",
      "say": "This is the live app, running on AWS Lambda on Graviton. You print the fifty millimetre ArUco marker, "
             "lay it flat next to the crack, take a photo, and pick the exposure. Each exposure carries its guideline "
-            "width from ACI 224R."},
+            "width from ACI 224R. One inspection takes about twenty seconds on this 512 megabyte function, so the "
+            "waits are shortened in this video."},
     {"id": "s035", "kind": "live", "action": "run", "sample": "synthetic-0.35mm.jpg",
      "expect": {"action": "monitor", "median": 0.36},
      "say": "Here is a synthetic test scene: a real concrete background and a crack exactly 0.35 millimetres wide. "
@@ -20,8 +21,8 @@ SCENES = [
     {"id": "trace", "kind": "live", "action": "trace", "sample": "synthetic-0.35mm.jpg",
      "say": "Every step is in the trace: what each OpenCV tool saw, how long it took, and why the agent chose the next one."},
     {"id": "tilt", "kind": "live", "action": "run", "sample": "synthetic-0.60mm-tilted.jpg",
-     "expect": {"action": "engineer_review", "median": 0.61},
-     "say": "Tilted twenty-eight degrees, true width 0.6 millimetres, measured 0.61. That is clearly over the guideline, "
+     "expect": {"action": "engineer_review", "median": 0.62},
+     "say": "Tilted twenty-eight degrees, true width 0.6 millimetres, measured 0.62. That is clearly over the guideline, "
             "so the case goes to an engineer, and the report flags that a person must review it."},
     {"id": "far", "kind": "live", "action": "run", "sample": "synthetic-far-away.jpg",
      "expect": {"action": "retake"},
@@ -37,7 +38,10 @@ SCENES = [
     {"id": "arch", "kind": "slide", "slide": "architecture",
      "say": "The whole system is one arm64 Lambda function behind a function URL, built and deployed with one "
             "CloudFormation template. Reports go to a private S3 bucket that deletes them after seven days, and the photo "
-            "itself is never stored. CloudWatch gets structured logs, metrics, a dashboard and an error alarm."},
+            "itself is never stored. CloudWatch gets structured logs, metrics, a dashboard and an error alarm. "
+            "We also ran an x86 twin of the same stack. The classical OpenCV steps run at about the same speed on both, "
+            "but the neural network step is two and a half times slower on Graviton with the stock wheel, so the twin "
+            "finishes in eleven seconds instead of twenty-three."},
     {"id": "loop", "kind": "slide", "slide": "agent-loop",
      "say": "The agent is a small deterministic planner. Blur, a missing marker, disagreement between the two detectors, "
             "or too few pixels across the crack each change its next step, and every uncertain case ends with a person."},

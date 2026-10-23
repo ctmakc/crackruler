@@ -8,7 +8,7 @@ ACI 224R-01 guideline for the chosen exposure. When the evidence is weak, it ask
 
 Built for the OpenCV AI Competition 2026, powered by AWS.
 
-- **Live endpoint:** `https://<function-url>` (filled in after deployment, see below)
+- **Live endpoint:** https://hwytllvqjarqppbcobgqs25lia0hywlx.lambda-url.us-east-1.on.aws/ (arm64 / Graviton; one inspection takes about 20 s on the 512 MB function) · x86 twin for comparison: https://xukarr3uxip3mzgheucpfgxqfm0uzthb.lambda-url.us-east-1.on.aws/
 - **Technical report:** [docs/TECHNICAL_REPORT.md](docs/TECHNICAL_REPORT.md)
 - **Architecture:** [docs/architecture.png](docs/architecture.png) · agent loop: [docs/agent-loop.png](docs/agent-loop.png)
 - **Printable marker:** [app/static/marker-50mm.svg](app/static/marker-50mm.svg)
@@ -63,7 +63,7 @@ infra/teardown.sh                                             # delete everythin
 
 `infra/build.sh` downloads the manylinux aarch64 wheels with `pip --platform`, so the arm64 package
 builds on any x86 machine without Docker or emulation. The stack (`infra/template.yaml`) creates:
-the Lambda function (Python 3.12, arm64, 2048 MB), its public Function URL, a private S3 bucket for
+the Lambda function (Python 3.12, arm64, 512 MB by default, `MEMORY=2048 infra/deploy.sh` where the account allows it), its public Function URL, a private S3 bucket for
 reports (7-day expiry), a log group (14 days), an error alarm, a CloudWatch dashboard and X-Ray tracing.
 
 Expected cost at demo traffic: inside the AWS free tier (Lambda requests and GB-seconds, S3 storage
@@ -78,7 +78,7 @@ python eval/eval_seg.py test        # -> eval/results/seg_test.json
 python eval/eval_cls.py 1000        # -> eval/results/cls_sample.json
 python eval/synth_width.py 4        # -> eval/results/synth_width.json (SYNTHETIC)
 python eval/tune_classical.py 4     # threshold search on the TRAIN split only
-python eval/bench.py [https://<function-url>]   # latency per agent tool
+python eval/bench.py [https://<function-url>]   # latency per agent tool (Lambda results in eval/results/bench_lambda_*.json)
 # training (GPU optional): pip install -r requirements-train.txt && python train/train_unet.py 6000
 ```
 

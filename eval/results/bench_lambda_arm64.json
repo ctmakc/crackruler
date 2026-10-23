@@ -1,0 +1,18 @@
+{
+ "endpoint": "https://hwytllvqjarqppbcobgqs25lia0hywlx.lambda-url.us-east-1.on.aws",
+ "arch": "aarch64",
+ "n": 9,
+ "server_ms_median": 22717.4,
+ "rtt_ms_median": 23052.6,
+ "per_tool_ms_median": {
+  "assess_quality": 60.7,
+  "find_marker": 278.1,
+  "rectify": 298.9,
+  "segment\u00b7dnn": 20553.4,
+  "segment\u00b7classical": 701.1,
+  "cross_check": 120.1,
+  "measure": 316.4,
+  "check_resolution": 0.1,
+  "decide": 0.0
+ }
+}

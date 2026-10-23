@@ -22,8 +22,11 @@ Parameters:
     Description: Empty for the main stack; e.g. "-x86" for a side-by-side comparison stack.
   MemorySize:
     Type: Number
-    Default: 2048
-    AllowedValues: [1024, 1536, 2048, 3008]
+    Default: 512
+    AllowedValues: [512, 1024, 1536, 2048, 3008]
+    Description: >-
+      512 MB fits a 12 MP photo with tiled U-Net inference (peak RSS about 400 MB measured
+      locally). New AWS accounts are capped at 512 MB per function until the quota grows.
   ReservedConcurrency:
     Type: Number
     Default: 0
@@ -119,6 +122,7 @@ Resources:
         Variables:
           REPORT_BUCKET: !Ref ReportBucket
           OMP_NUM_THREADS: "2"
+          MAX_PIXELS: "12600000"
 
   FunctionUrl:
     Type: AWS::Lambda::Url
