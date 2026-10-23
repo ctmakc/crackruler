@@ -47,7 +47,7 @@ next under the exposure the element lives in.
   (384 px kept, 64 px of context on each side, windows clipped at the image edge); on the 69 test photos
   this gives the same F1 as a single pass (0.937), and the peak memory on Lambda is 446 MB.
   Package: OpenCV 5.0.0 (`opencv-contrib-python-headless==5.0.0.93`), numpy 2.5.4, the ONNX model
-  (6.2 MB) and the app; 62 MB zipped, 152 MB unzipped. It is built without Docker: `pip --platform
+  (6.2 MB) and the app; 64 MB zipped, 152 MB unzipped. It is built without Docker: `pip --platform
   manylinux_2_28_aarch64` fetches the Arm wheels on any machine.
 - **Entry:** Lambda Function URL (HTTPS, CORS). Routes: `GET /`, `GET /api/health`,
   `GET /api/samples`, `POST /api/inspect`, `GET /api/report/<id>`.

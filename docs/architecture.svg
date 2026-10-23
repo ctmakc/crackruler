@@ -35,7 +35,7 @@
   <!-- lambda -->
   <rect x="440" y="140" width="700" height="450" fill="#E3E4DF" stroke="#1E2120" stroke-width="2.5"/>
   <text x="464" y="176" font-size="22" font-weight="800" fill="#1E2120">Lambda crackruler-inspect</text>
-  <text x="464" y="204" font-size="15" fill="#1E2120">Python 3.12 · arm64 (AWS Graviton) · 2048 MB · 60 s · zip 62 MB / 152 MB unzipped</text>
+  <text x="464" y="204" font-size="15" fill="#1E2120">Python 3.12 · arm64 (AWS Graviton) · 512 MB · 60 s · zip 64 MB / 152 MB unzipped</text>
   <rect x="464" y="222" width="652" height="40" fill="#1E2120"/>
   <text x="480" y="248" font-size="16" font-weight="700" fill="#E4E5E0">OpenCV 5.0.0 (opencv-contrib-python-headless 5.0.0.93) · numpy 2.5.4</text>
 
