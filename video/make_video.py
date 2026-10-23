@@ -51,8 +51,11 @@ def main():
         d = dur(mp3)
         total = LEAD + d + TAIL
         clip = os.path.join(OUT, f"{i:02d}-{s['id']}.mp4")
+        side = clip + ".note.json"   # on-screen note for a shortened wait, kept for clip reuse
         if os.path.exists(clip) and os.environ.get("REUSE", "1") == "1":
-            pass
+            if os.path.exists(side):
+                off, x = json.load(open(side))
+                notes.append((t + off, t + off + 2.5, x))
         elif s["kind"] == "slide":
             png = os.path.join(OUT, f"slide-{s['slide']}.png")
             run(["node", "-e", f"""
@@ -77,8 +80,9 @@ await p.goto('file://{HERE}/slides.html#{s["slide"]}');await p.waitForTimeout(60
                 wait = b - a + 1.7
                 vsrc = (f"[0:v]split[s1][s2];[s1]trim=start={res['mark']:.3f}:end={a:.3f},setpts=PTS-STARTPTS[va];"
                         f"[s2]trim=start={b:.3f},setpts=PTS-STARTPTS[vb];[va][vb]concat=n=2:v=1:a=0,")
-                notes.append((t + a - res["mark"], t + a - res["mark"] + 2.5,
-                              f"{wait:.0f} s on AWS Lambda, wait shortened in this video"))
+                note = f"{wait:.0f} s on AWS Lambda, wait shortened in this video"
+                notes.append((t + a - res["mark"], t + a - res["mark"] + 2.5, note))
+                json.dump([a - res["mark"], note], open(side, "w"))
             else:
                 vsrc = f"[0:v]trim=start={res['mark']:.3f},setpts=PTS-STARTPTS,"
             run(["ffmpeg", "-y", "-i", res["video"], "-i", mp3, "-filter_complex",
