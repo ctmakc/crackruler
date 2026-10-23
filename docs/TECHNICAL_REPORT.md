@@ -1,7 +1,7 @@
 # CrackRuler: technical report
 
 OpenCV AI Competition 2026, powered by AWS · Team: Maksym Stepanenko (INNOVA CONSULT LTD, Ottawa, Canada)
-Repository: https://github.com/ctmakc/crackruler · Endpoint: see README
+Repository: https://github.com/ctmakc/crackruler · Endpoint: https://hwytllvqjarqppbcobgqs25lia0hywlx.lambda-url.us-east-1.on.aws/ · Video: https://www.youtube.com/watch?v=8CUrgB_a84I
 
 ## 1. Problem
 

@@ -8,7 +8,7 @@
 
 **Links:** Try it out: https://hwytllvqjarqppbcobgqs25lia0hywlx.lambda-url.us-east-1.on.aws/ · Code: https://github.com/ctmakc/crackruler · Technical report: https://github.com/ctmakc/crackruler/blob/main/docs/TECHNICAL_REPORT.md
 
-**Video:** <YOUTUBE_URL>
+**Video:** https://www.youtube.com/watch?v=8CUrgB_a84I
 
 **Gallery images:** docs/architecture.png, docs/agent-loop.png, docs/example-annotated.jpg, docs/failure-cases.jpg, UI screenshot (result view)
 

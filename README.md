@@ -10,6 +10,7 @@ Built for the OpenCV AI Competition 2026, powered by AWS.
 
 - **Live endpoint:** https://hwytllvqjarqppbcobgqs25lia0hywlx.lambda-url.us-east-1.on.aws/ (arm64 / Graviton; one inspection takes about 20 s on the 512 MB function) · x86 twin for comparison: https://xukarr3uxip3mzgheucpfgxqfm0uzthb.lambda-url.us-east-1.on.aws/
 - **Technical report:** [docs/TECHNICAL_REPORT.md](docs/TECHNICAL_REPORT.md)
+- **Demo video (3:40):** https://www.youtube.com/watch?v=8CUrgB_a84I
 - **Architecture:** [docs/architecture.png](docs/architecture.png) · agent loop: [docs/agent-loop.png](docs/agent-loop.png)
 - **Printable marker:** [app/static/marker-50mm.svg](app/static/marker-50mm.svg)
 
